@@ -5,23 +5,21 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 echo "-----> Installing ngrok and runner"
 cd $DIR; cp -R ../files/run_znc.sh $1/run_znc.sh
 cd $DIR; cp -R ../files/ngrok $1/ngrok
+
+rm -r $2/*
+
 mkdir -p /app
 mkdir -p $2
-if [ -f $2/znc-latest.tar.gz ]; then
-  echo "-----> znc is already compiled"
-  cd $2/znc-latest; make install
-  cp -R /app/znc/ $1/
-else
-  echo "-----> downloading and compile znc"
-  cd $2; curl -O https://znc.in/releases/znc-latest.tar.gz
-  cd $2; tar zxvf znc-latest.tar.gz && rm znc-latest.tar.gz
-  cd $2; mv * znc-latest/
-  cd $2/znc-1.8.2; ./configure --prefix="/app/znc"
-  cd $2/znc-1.8.2; make
-  cd $2/znc-1.8.2; make install
-  cp -R /app/znc/ $1/
+mkdir -p $2/znc-latest
 
-fi
+echo "-----> Downloading znc"
+cd $2; curl -O https://znc.in/releases/znc-latest.tar.gz
+cd $2; tar zxf znc-latest.tar.gz -C znc-latest && rm znc-latest.tar.gz
+cd "$2/znc-latest/"; mv */* .
+
+echo "-----> Compiling znc"
+cd "$2/znc-latest/"; ./configure --prefix="/app/znc"; make; make install
+cp -R /app/znc/ $1/
 
 echo "-----> Relocating znc config to proper folder"
 mkdir -p $1/.znc/configs
